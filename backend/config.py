@@ -7,14 +7,16 @@ import sys
 from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 
+
 load_dotenv()
+
 
 # === Настройка логирования ===
 def setup_logging():
     """Настройка логирования для всего приложения"""
     log_format = "%(asctime)s | %(levelname)-8s | %(name)-25s | %(message)s"
     date_format = "%Y-%m-%d %H:%M:%S"
-    
+
     # Основной логгер
     logging.basicConfig(
         level=logging.INFO,
@@ -24,7 +26,7 @@ def setup_logging():
             logging.StreamHandler(sys.stdout)
         ]
     )
-    
+
     # Уменьшаем логи от сторонних библиотек
     logging.getLogger("httpx").setLevel(logging.WARNING)
     logging.getLogger("httpcore").setLevel(logging.WARNING)
@@ -32,8 +34,9 @@ def setup_logging():
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logging.getLogger("selenium").setLevel(logging.WARNING)
     logging.getLogger("WDM").setLevel(logging.WARNING)
-    
+
     return logging.getLogger("competitor_monitor")
+
 
 # Инициализация логгера
 logger = setup_logging()
@@ -41,29 +44,47 @@ logger = setup_logging()
 
 class Settings(BaseSettings):
     """Настройки приложения"""
-    
+
     # ProxyAPI (OpenAI-совместимый)
     proxy_api_key: str = os.getenv("PROXY_API_KEY", "")
     proxy_api_base_url: str = "https://api.proxyapi.ru/openai/v1"
     openai_model: str = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
     openai_vision_model: str = os.getenv("OPENAI_VISION_MODEL", "gpt-4o-mini")
-    
+
     # API
     api_host: str = "0.0.0.0"
     api_port: int = 8000
-    
+
     # История
     history_file: str = "history.json"
     max_history_items: int = 10
-    
-    # Парсер
+
+    # Парсер (Selenium)
     parser_timeout: int = 10
-    parser_user_agent: str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-    
+    parser_user_agent: str = (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/120.0.0.0 Safari/537.36"
+    )
+
+    # Сайты конкурентов для /parsedemo
+    # Можно переопределить через .env: COMPETITOR_URLS="https://site1.com,https://site2.com"
+    competitor_urls_raw: str = os.getenv(
+        "COMPETITOR_URLS",
+        "https://example.com",
+    )
+
+    @property
+    def competitor_urls(self) -> list[str]:
+        return [
+            u.strip()
+            for u in self.competitor_urls_raw.split(",")
+            if u.strip()
+        ]
+
     class Config:
         env_file = ".env"
         extra = "ignore"
 
 
 settings = Settings()
-

@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 
 # === Запросы ===
 
+
 class TextAnalysisRequest(BaseModel):
     """Запрос на анализ текста"""
     text: str = Field(..., min_length=10, description="Текст для анализа")
@@ -20,6 +21,7 @@ class ParseDemoRequest(BaseModel):
 
 # === Ответы ===
 
+
 class CompetitorAnalysis(BaseModel):
     """Структурированный анализ конкурента"""
     strengths: List[str] = Field(default_factory=list, description="Сильные стороны")
@@ -27,6 +29,18 @@ class CompetitorAnalysis(BaseModel):
     unique_offers: List[str] = Field(default_factory=list, description="Уникальные предложения")
     recommendations: List[str] = Field(default_factory=list, description="Рекомендации")
     summary: str = Field("", description="Общее резюме")
+    design_score: int = Field(
+        0,
+        ge=0,
+        le=10,
+        description="Оценка визуального стиля/дизайна под вашу нишу (0-10)",
+    )
+    animation_potential: int = Field(
+        0,
+        ge=0,
+        le=10,
+        description="Потенциал для анимации/ motion-дизайна (0-10)",
+    )
 
 
 class ImageAnalysis(BaseModel):
@@ -36,6 +50,18 @@ class ImageAnalysis(BaseModel):
     visual_style_score: int = Field(0, ge=0, le=10, description="Оценка визуального стиля (0-10)")
     visual_style_analysis: str = Field("", description="Анализ визуального стиля")
     recommendations: List[str] = Field(default_factory=list, description="Рекомендации")
+    design_score: int = Field(
+        0,
+        ge=0,
+        le=10,
+        description="Оценка дизайна именно под вашу сферу (0-10)",
+    )
+    animation_potential: int = Field(
+        0,
+        ge=0,
+        le=10,
+        description="Потенциал изображения/макета для анимации (0-10)",
+    )
 
 
 class ParsedContent(BaseModel):
@@ -71,6 +97,7 @@ class ParseDemoResponse(BaseModel):
 
 # === История ===
 
+
 class HistoryItem(BaseModel):
     """Элемент истории"""
     id: str
@@ -84,4 +111,3 @@ class HistoryResponse(BaseModel):
     """Ответ со списком истории"""
     items: List[HistoryItem]
     total: int
-
